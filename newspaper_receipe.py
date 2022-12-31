@@ -4,6 +4,11 @@ import logging
 logging.basicConfig(level=logging.INFO)
 from urllib.parse import urlparse
 import pandas as pd
+import nltk 
+from nltk.corpus import stopwords
+
+nltk.download('punkt') 
+nltk.download('stopwords')
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +23,9 @@ def main(filename):
     df = _generate_uids_for_rows(df)
     df = _remove_new_lines_from_body(df)
     df = _change_NaN_body(df)
+    df = _drop_Nan_rows(df)
+    df = _tokenize_column(df,'title')
+    df = _tokenize_column(df,'body')
 
     return df
 
@@ -74,19 +82,46 @@ def _generate_uids_for_rows(df):
 
 def _remove_new_lines_from_body(df):
     logger.info('Removing new lines from body')
-    stripped_body = df['body'].str.replace('/n',' ')
+    stripped_body =(df
+                 .apply(lambda row: row['body'],axis=1)
+                 .apply(str)
+                 .apply(lambda body: list(body))
+                 .apply(lambda letters: list(map(lambda letter: letter.replace('\n',''),letters)))
+                 .apply(lambda letters: ''.join(letters)))
     df['body'] = stripped_body
 
     return df
 
-
-def _change_NaN_body(df):
-    logger.info('Changing NaN to None')
-    Nan_body_mask = df['body'].isna()
-    df.loc[Nan_body_mask,'body'] = 'Problem with scraping body'
-
+def _drop_Nan_rows(df):
+    logger.info('Dropping Nan rows')
+    df = df.dropna()
 
     return df
+
+def _change_NaN_body(df):
+    logger.info('Changing nan string to NaN')
+    df['body'] = df['body'].replace('nan',float('nan'))
+
+    return df
+
+def _tokenize_column(df,column_name):
+    logger.info('Tokenizing column {}'.format(column_name))
+    stop_words = set(stopwords.words('spanish'))
+
+    column = 'n_tokens_' + column_name
+
+    df[column] = (df
+                            .apply(lambda row: nltk.word_tokenize(row[column_name]),axis=1)
+                            .apply(lambda tokens: list(filter(lambda token: token.isalpha(),tokens)))
+                            .apply(lambda tokens: list(map(lambda token: token.lower(),tokens)))
+                            .apply(lambda word_list: list(filter(lambda word: word not in stop_words,word_list)))
+                            .apply(lambda valid_word_list: len(valid_word_list))
+                           )
+
+    return df
+    
+
+ 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('filename',help='The path to the dirty data',type=str)
