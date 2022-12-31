@@ -17,15 +17,17 @@ def main(filename):
 
     df = _read_data(filename)
     newspaper_uid = _extract_newspaper_uid(filename)
+    df = _change_NaN_body(df)
+    df = _drop_Nan_rows(df)
     df = _add_newspaper_uid_column(df,newspaper_uid)
     df = _extract_host(df)
     df = _fill_missing_titles(df)
     df = _generate_uids_for_rows(df)
     df = _remove_new_lines_from_body(df)
-    df = _change_NaN_body(df)
-    df = _drop_Nan_rows(df)
     df = _tokenize_column(df,'title')
     df = _tokenize_column(df,'body')
+    df = _remove_duplicate_entries(df,'title')
+    _save_data(df,filename)
 
     return df
 
@@ -121,7 +123,19 @@ def _tokenize_column(df,column_name):
     return df
     
 
- 
+def _remove_duplicate_entries(df,column_name):
+    logger.info('Removing duplicate entries')
+    df.drop_duplicates(subset=[column_name],keep='first',inplace=True)
+
+    return df
+
+def _save_data(df,filename):
+    clean_filename = 'clean_{}'.format(filename)
+    logger.info('Saving data at location: {}'.format(clean_filename))
+
+    df.to_csv(clean_filename)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('filename',help='The path to the dirty data',type=str)
