@@ -4,8 +4,8 @@ import panda as pd
 import csv
 import logging
 import re
-import news_page_objects as news
-from common import config
+import extract.news_page_objects as news
+from extract.common import config
 
 from requests.exceptions import HTTPError
 from urllib3.exceptions import MaxRetryError
