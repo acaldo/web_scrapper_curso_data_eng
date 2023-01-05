@@ -1,11 +1,11 @@
 import argparse
 import datetime
-import panda as pd
+import pandas as pd
 import csv
 import logging
 import re
-import extract.news_page_objects as news
-from extract.common import config
+import news_page_objects as news
+from common import config
 
 from requests.exceptions import HTTPError
 from urllib3.exceptions import MaxRetryError

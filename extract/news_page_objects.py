@@ -1,7 +1,7 @@
 import requests
 import bs4
 
-from extract.common import config
+from common import config
 
 class NewsPage:
 
