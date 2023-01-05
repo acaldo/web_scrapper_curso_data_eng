@@ -7,11 +7,11 @@ class Article(Base):
     id = Column(String, primary_key=True)
     body = Column(String)
     host = Column(String)
-    title = Column(String)
+    title = Column(String, unique=True)
     newspaper_uid = Column(String)
     n_tokens_body = Column(Integer)
     n_tokens_title = Column(Integer)
-    url = Column(String, unique=True)
+    url = Column(String)
 
     def __init__(self, uid, body, host, title, newspaper_uid, n_tokens_body, n_tokens_title, url):
         self.id = uid

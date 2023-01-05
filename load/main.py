@@ -20,10 +20,10 @@ def main(filename):
         article = Article(row['uid'],
                           row['body'],
                           row['host'],
+                          row['title'],
                           row['newspaper_uid'],
                           row['n_tokens_body'],
                           row['n_tokens_title'],
-                          row['title'],
                           row['url'])
 
         session.add(article)
